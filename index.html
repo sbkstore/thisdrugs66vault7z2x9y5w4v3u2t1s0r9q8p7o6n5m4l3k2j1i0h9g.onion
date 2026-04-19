@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>THISDRUGS | Premium Secure Vault</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+    
+    <style>
+        :root {
+            --bg-deep: #0a0b0d;
+            --surface: #14161a;
+            --accent: #ffffff;
+            --border: rgba(255, 255, 255, 0.08);
+            --text-secondary: #848e9c;
+            --success: #02c076;
+            --danger: #ff4d4d;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: #eaeaea;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden; 
+        }
+
+        /* --- LOGIN OVERLAY --- */
+        #loginOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-deep);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-box {
+            background: var(--surface);
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            text-align: center;
+            max-width: 400px; width: 90%;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        .swal2-container { z-index: 10001 !important; }
+
+        .shake { animation: shake 0.4s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            background: rgba(10, 11, 13, 0.98) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 0;
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .navbar-brand { font-weight: 800; letter-spacing: 2px; color: var(--accent) !important; }
+
+        /* --- PRODUCT CARDS --- */
+        .card {
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 12px !important;
+            transition: 0.3s;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .card:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-5px); }
+
+        .card-img-top {
+            height: 220px;
+            object-fit: cover;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .btn-premium {
+            background: var(--accent) !important;
+            color: var(--bg-deep) !important;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            width: 100%;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .btn-premium:disabled { opacity: 0.15; cursor: not-allowed; filter: grayscale(1); }
+
+        .badge-status {
+            position: absolute; top: 12px; left: 12px;
+            background: #fff; color: #000; padding: 4px 10px;
+            border-radius: 4px; font-size: 0.6rem; font-weight: 800; z-index: 10;
+        }
+
+        .envio-gratis-badge {
+            position: absolute; top: 12px; right: 12px;
+            background: var(--success); color: #fff; padding: 4px 10px;
+            border-radius: 4px; font-size: 0.6rem; font-weight: 800; z-index: 10;
+        }
+
+        /* --- MODALES --- */
+        .modal-content {
+            background: var(--surface) !important;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: #fff;
+        }
+
+        .form-control {
+            background: var(--bg-deep) !important;
+            border: 1px solid var(--border) !important;
+            color: #fff !important;
+            border-radius: 8px;
+        }
+
+        .img-full-detail {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .categoria { display: none; padding-top: 20px; }
+
+        .telegram-float {
+            position: fixed; bottom: 25px; right: 25px;
+            width: 55px; height: 55px; background: #fff; color: #000;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; z-index: 1000; text-decoration: none;
+        }
+
+        .hero {
+            padding: 100px 0 60px;
+            background: radial-gradient(circle at 50% -20%, #1e2229 0%, var(--bg-deep) 70%);
+        }
+    </style>
+</head>
+<body>
+
+<div id="loginOverlay">
+    <div class="login-box" id="boxLogin">
+        <h4 class="fw-bold text-white mb-4">TERMINAL LOGIN</h4>
+        <input type="password" id="accessKey" class="form-control mb-3 text-center" placeholder="TOKEN DE ACCESO">
+        <button class="btn btn-premium" onclick="checkAccess()">AUTENTICAR</button>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="#" onclick="mostrarCategoria('inicio')">THISDRUGS.</a>
+        <div class="ms-auto d-flex align-items-center">
+            <div onclick="abrirCarrito()" style="position:relative; cursor:pointer;" class="me-3">
+                <i class="bi bi-shield-lock" style="font-size: 1.6rem;"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartCount" style="font-size: 0.6rem;">0</span>
+            </div>
+            <button class="btn btn-outline-light btn-sm d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#menu"><i class="bi bi-list"></i></button>
+        </div>
+        <div class="collapse navbar-collapse" id="menu">
+            <ul class="navbar-nav ms-3">
+                <li class="nav-item"><a class="nav-link text-white" href="#" onclick="mostrarCategoria('inicio')">ACCESO</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="#" onclick="mostrarCategoria('catalogo')">CATÁLOGO</a></li>
+               </ul>
+        </div>
+    </div>
+</nav>
+
+<div id="mainContainer" class="container">
+    <div class="categoria" id="inicio" style="display: block;">
+        <section class="hero text-center">
+            <h1 class="display-4 fw-bold mb-3">SECURE TERMINAL</h1>
+            <p class="text-secondary mb-5">Suministros de alta fidelidad procesados bajo protocolos de encriptación.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <button class="btn btn-premium px-5" style="width:auto" onclick="mostrarCategoria('catalogo')">ENTRAR AL VAULT</button>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade" id="detalleModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="fw-bold" id="detalleTitulo"></h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <img id="detalleImg" class="img-full-detail" src="">
+                <p id="detalleDesc" class="text-secondary small"></p>
+                <h4 class="text-success fw-bold" id="detallePrecio"></h4>
+            </div>
+            <div class="modal-footer border-0">
+                <button class="btn btn-premium" id="btnAgregarDetalle">ADQUIRIR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="carritoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="fw-bold">ORDEN DE ADQUISICIÓN</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="carritoLista" class="mb-4"></div>
+                <div class="mb-3">
+                    <label class="form-label small text-secondary fw-bold">CONTACTO:</label>
+                    <input type="text" class="form-control py-3" id="telegramUser" placeholder="@Usuario_Telegram" oninput="validarFormulario()">
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button class="btn btn-premium py-3" id="btnFinalizar" onclick="finalizarOrden()" disabled>CONFIRMAR PROTOCOLO</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a class="telegram-float" href="https://t.me/thisdrugs1" target="_blank"><i class="bi bi-telegram"></i></a>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="productos.js"></script>
+<script src="armas.js"></script>
+
+<script>
+    // Iniciar vault desde el almacenamiento local
+    let vault = JSON.parse(localStorage.getItem("carrito")) || [];
+
+    function checkAccess() {
+        const key = document.getElementById('accessKey').value.trim();
+        const box = document.getElementById('boxLogin');
+        if (key === 'PG2001') {
+            document.getElementById('loginOverlay').style.transition = '1s';
+            document.getElementById('loginOverlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }, 1000);
+        } else if (key === 'TD20K2') {
+            box.classList.add('shake');
+            setTimeout(() => box.classList.remove('shake'), 400);
+            Swal.fire({ icon: 'error', title: 'ACCESO ÚNICO DENEGADO', text: 'IP DESCONOCIDA!', background: '#14161a', color: '#fff' });
+        } else {
+            box.classList.add('shake');
+            setTimeout(() => box.classList.remove('shake'), 400);
+            Swal.fire({ icon: 'warning', title: 'ERROR', text: 'USUARIO NO ENCONTRADO', background: '#14161a', color: '#fff' });
+        }
+    }
+
+    document.getElementById('accessKey').addEventListener('keyup', (e) => { if(e.key === "Enter") checkAccess(); });
+
+    function cargarProductos() {
+        const container = document.getElementById("mainContainer");
+        if(typeof productos === 'undefined') return;
+        for (let cat in productos) {
+            if (cat === 'inicio') continue;
+            const section = document.createElement("div");
+            section.id = cat;
+            section.className = "categoria row row-cols-1 row-cols-md-3 g-4";
+            productos[cat].forEach((p, i) => {
+                let precioLimpio = parseInt(p.precio.replace(/[$.]/g, ''));
+                let badgeEnvio = precioLimpio >= 200000 ? `<div class="envio-gratis-badge">ENVÍO GRATIS</div>` : '';
+                section.innerHTML += `
+                    <div class="col">
+                        <div class="card p-2" onclick="verDetalle('${cat}', ${i})">
+                            <div class="position-relative">
+                                ${p.etiqueta ? `<div class="badge-status">${p.etiqueta.toUpperCase()}</div>` : ''}
+                                ${badgeEnvio}
+                                <img src="${p.imagenes[0]}" class="card-img-top">
+                            </div>
+                            <div class="card-body px-1">
+                                <h6 class="fw-bold text-white mb-1">${p.titulo}</h6>
+                                <p class="text-success fw-bold mb-3">${p.precio}</p>
+                                <button class="btn-premium" onclick="event.stopPropagation(); agregar('${cat}', ${i})">ADQUIRIR</button>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            container.appendChild(section);
+        }
+    }
+
+    function verDetalle(cat, index) {
+        const p = productos[cat][index];
+        document.getElementById('detalleTitulo').innerText = p.titulo;
+        document.getElementById('detalleImg').src = p.imagenes[0];
+        document.getElementById('detalleDesc').innerText = p.descripcion || "Protocolo de alta seguridad verificado.";
+        document.getElementById('detallePrecio').innerText = p.precio;
+        const btn = document.getElementById('btnAgregarDetalle');
+        btn.onclick = () => { agregar(cat, index); bootstrap.Modal.getInstance(document.getElementById('detalleModal')).hide(); };
+        new bootstrap.Modal(document.getElementById('detalleModal')).show();
+    }
+
+    function mostrarCategoria(id) {
+        document.querySelectorAll('.categoria').forEach(c => c.style.display = 'none');
+        const target = document.getElementById(id);
+        if(target) target.style.display = (id === 'inicio') ? 'block' : 'flex';
+        window.scrollTo(0,0);
+    }
+
+    function agregar(cat, index) {
+        vault.push(productos[cat][index]);
+        localStorage.setItem("carrito", JSON.stringify(vault));
+        actualizarUI();
+        Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, background: '#14161a', color: '#fff', icon: 'success', title: 'Añadido al vault' });
+    }
+
+    function actualizarUI() {
+        document.getElementById("cartCount").innerText = vault.length;
+        const lista = document.getElementById("carritoLista");
+        let html = "";
+        vault.forEach((item, i) => {
+            html += `<div class='d-flex justify-content-between mb-2 small'><span>${item.titulo}</span><b>${item.precio} <i class='bi bi-trash text-danger ms-2' style='cursor:pointer' onclick='quitar(${i})'></i></b></div>`;
+        });
+        lista.innerHTML = html || "<p class='text-center text-secondary'>Vault vacío.</p>";
+        validarFormulario();
+    }
+
+    function quitar(i) { 
+        vault.splice(i, 1); 
+        localStorage.setItem("carrito", JSON.stringify(vault));
+        actualizarUI(); 
+    }
+
+    function validarFormulario() {
+        const user = document.getElementById('telegramUser').value.trim();
+        const ok = vault.length > 0 && user.length >= 3;
+        document.getElementById("btnFinalizar").disabled = !ok;
+    }
+
+    function abrirCarrito() { actualizarUI(); new bootstrap.Modal(document.getElementById('carritoModal')).show(); }
+
+    function finalizarOrden() { 
+        // Guardamos solo el usuario de Telegram
+        const datosCliente = {
+            telegram: document.getElementById('telegramUser').value.trim()
+        };
+        localStorage.setItem("datos_cliente", JSON.stringify(datosCliente));
+        window.location.href = "pago.html"; 
+    }
+
+    window.onload = () => { cargarProductos(); actualizarUI(); mostrarCategoria('inicio'); };
+</script>
+</body>
+</html>

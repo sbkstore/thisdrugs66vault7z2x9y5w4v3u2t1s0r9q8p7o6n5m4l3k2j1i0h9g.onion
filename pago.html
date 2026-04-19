@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>THISDRUGS | Mobile Checkout</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --bg-deep: #0a0b0d;
+            --surface: #14161a;
+            --accent: #ffffff;
+            --border: rgba(255, 255, 255, 0.08);
+            --text-secondary: #848e9c;
+            --success: #02c076;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-deep); 
+            color: #eaeaea;
+            padding-bottom: 40px;
+        }
+
+        .navbar { 
+            background: rgba(10, 11, 13, 0.98); 
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0; 
+        }
+        
+        .navbar-brand { font-weight: 800; letter-spacing: 2px; color: var(--accent) !important; font-size: 1.2rem; }
+
+        .checkout-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .crypto-box {
+            background: #000;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .qr-img { 
+            width: 200px; 
+            height: 200px; 
+            background: white; 
+            padding: 10px; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+        }
+        
+        .address-box { 
+            background: #0a0b0d; 
+            border: 1px solid #333; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            font-size: 0.85rem; 
+            word-break: break-all; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-btn { color: var(--success); font-weight: 800; font-size: 0.75rem; text-transform: uppercase; margin-left: 10px; cursor: pointer; }
+        
+        .btn-premium { 
+            background: var(--accent) !important; 
+            color: var(--bg-deep) !important; 
+            font-weight: 800; 
+            border-radius: 12px; 
+            text-transform: uppercase; 
+            padding: 18px; 
+            border: none;
+            width: 100%;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        .resumen-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .total-box {
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--success);
+        }
+
+        .step-badge {
+            background: var(--success);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark sticky-top">
+    <div class="container text-center">
+        <a class="navbar-brand mx-auto" href="index.html">THISDRUGS.</a>
+    </div>
+</nav>
+
+<div class="checkout-container">
+    
+    <div class="section-card">
+        <h6 class="fw-bold mb-3"><i class="bi bi-cart3 me-2"></i> RESUMEN DE ORDEN</h6>
+        <div id="resumenItems"></div>
+        <div class="total-box">
+            <span>TOTAL</span>
+            <span id="resumenTotal">$0</span>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h6 class="fw-bold mb-3"><span class="step-badge">1</span> TRANSFERIR USDT (TRC20)</h6>
+        <div class="crypto-box mb-3">
+            <img src="qr.jpg" alt="QR PAGO" class="qr-img">
+            <div class="text-start">
+                <label class="small text-secondary fw-bold mb-1">DIRECCIÓN TRC20:</label>
+                <div class="address-box mb-3">
+                    <span id="addrText">TKnfinsu3UxWd87RiW9uHL9EVBrU5n5DJQ</span>
+                    <span class="copy-btn" onclick="copiar('addrText')">COPIAR</span>
+                </div>
+                <label class="small text-secondary fw-bold mb-1">BINANCE ID:</label>
+                <div class="address-box">
+                    <span id="binanceId">900140925</span>
+                    <span class="copy-btn" onclick="copiar('binanceId')">COPIAR</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h6 class="fw-bold mb-3"><span class="step-badge">2</span> SUBIR COMPROBANTE</h6>
+        <input class="form-control" type="file" id="comprobanteFoto" accept="image/*">
+        <p class="text-secondary small mt-2 mb-0">Adjunta captura de pantalla del envío.</p>
+    </div>
+
+    <button class="btn btn-premium" id="btnConfirmarCrypto">
+        FINALIZAR PROTOCOLO
+    </button>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function copiar(id) {
+    const texto = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(texto);
+    const Toast = Swal.mixin({ toast: true, position: 'top', showConfirmButton: false, timer: 1000, background: '#14161a', color: '#fff' });
+    Toast.fire({ icon: 'success', title: 'Copiado' });
+}
+
+window.onload = function() {
+    const vault = JSON.parse(localStorage.getItem("carrito")) || [];
+    let total = 0;
+    let html = "";
+    
+    vault.forEach(p => {
+        const precioNum = parseInt(p.precio.replace(/[$.]/g, ''));
+        total += precioNum;
+        html += `<div class="resumen-item"><span>${p.titulo}</span><span>${p.precio}</span></div>`;
+    });
+
+    document.getElementById("resumenItems").innerHTML = html || "<p class='text-center'>Vault vacío</p>";
+    document.getElementById("resumenTotal").innerText = `$${total.toLocaleString('es-AR')}`;
+};
+
+async function comprimirImagen(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width, height = img.height;
+                if (width > 800) { height *= 800 / width; width = 800; }
+                canvas.width = width; canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.7);
+            };
+        };
+    });
+}
+
+document.getElementById("btnConfirmarCrypto").addEventListener("click", async function() {
+    const fotoInput = document.getElementById("comprobanteFoto");
+    if (fotoInput.files.length === 0) {
+        Swal.fire({ icon: 'warning', title: 'FALTA COMPROBANTE', text: 'Adjunta la captura para validar.', background: '#14161a', color: '#fff' });
+        return;
+    }
+
+    Swal.fire({ title: 'PROCESANDO...', background: '#14161a', color: '#fff', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+    try {
+        const fotoBlob = await comprimirImagen(fotoInput.files[0]);
+        const datosCliente = JSON.parse(localStorage.getItem("datos_cliente")) || {};
+        const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+        const total = document.getElementById("resumenTotal").innerText;
+        
+        let lista = carrito.map(p => `- ${p.titulo}`).join("\n");
+
+        const msg = `💎 NUEVA ORDEN\n\n👤 CLIENTE: ${datosCliente.telegram || 'Sin User'}\n\n📦 ACTIVOS:\n${lista}\n\n💰 TOTAL: ${total}`;
+
+        const formData = new FormData();
+        formData.append("chat_id", "6493944778");
+        formData.append("photo", fotoBlob, "pago.jpg");
+        formData.append("caption", msg);
+
+        const res = await fetch(`https://api.telegram.org/bot7452393821:AAEHY511Yv-1KqScg7tylWVc8xwFV26GSkQ/sendPhoto`, { method: 'POST', body: formData });
+
+        if (res.ok) {
+            Swal.fire({ icon: 'success', title: 'LISTO', text: 'Protocolo enviado correctamente.', background: '#14161a', color: '#fff' }).then(() => {
+                localStorage.removeItem("carrito");
+                window.location.href = "index.html";
+            });
+        }
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'ERROR', text: 'Reintenta en un momento.', background: '#14161a', color: '#fff' });
+    }
+});
+</script>
+</body>
+</html>
